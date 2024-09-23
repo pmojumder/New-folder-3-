@@ -1,0 +1,61 @@
+pipeline {
+    agent any 
+
+    environment {
+        APP_NAME = 'MyApp'
+        VERSION = '1.0.0'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo "Checking out the code from the repository..."
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo "Building the application..."
+                sh 'make build'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo "Running tests..."
+                sh 'make test'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo "Deploying ${APP_NAME} version ${VERSION}..."
+                // Deployment commands here
+                sh 'make deploy'
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                echo "Archiving artifacts..."
+                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+            // Optional: Add success notifications here (e.g., email, Slack)
+        }
+        failure {
+            echo 'Pipeline failed!'
+            // Optional: Add failure notifications here
+        }
+        always {
+            echo 'Cleaning up resources...'
+            // Cleanup actions if needed
+        }
+    }
+}
